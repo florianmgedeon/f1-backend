@@ -31,6 +31,10 @@ app.get('/api/live-data', (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.send('Backend is live. Try /api/live-data');
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
