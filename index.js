@@ -16,7 +16,7 @@ let latestData = null;
 if (running) {
   setInterval(async () => {
     try {
-      const since = new Date(Date.now() - 2000).toISOString();
+      const since = new Date(Date.now() - 5000).toISOString(); // 5s window
 
       const res = await axios.get(
         testing
@@ -25,7 +25,12 @@ if (running) {
       );
 
       const data = res.data;
-      if (data.length > 0) latestData = data[data.length - 1];
+
+      if (data.length > 0) {
+        // Sort by date ascending and pick the oldest
+        data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        latestData = data[0];
+      }
     } catch (err) {
       console.error('OpenF1 fetch error in index.js line 24:', err.message);
     }
