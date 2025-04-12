@@ -7,25 +7,37 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
+// 🏁 FLAGS
+const testing = true;
+const running = false;
+
 let latestData = null;
 
-// setInterval(async () => {
-//   try {
-//     const since = new Date(Date.now() - 2000).toISOString();
-//     //const res = await axios.get(`https://api.openf1.org/v1/car_data?driver_number=1&session_key=latest&date>${since}`);
-//     //testing only:
-//     const res = await axios.get(`https://api.openf1.org/v1/car_data?driver_number=55&session_key=9159&speed%3E=315`);
-//     const data = res.data;
-//     if (data.length > 0) latestData = data[data.length - 1];
-//   } catch (err) {
-//     console.error('OpenF1 fetch error in index.js line 21:', err.message);
-//   }
-// }, 500);
+if (running) {
+  setInterval(async () => {
+    try {
+      const since = new Date(Date.now() - 2000).toISOString();
+
+      const res = await axios.get(
+        testing
+          ? `https://api.openf1.org/v1/car_data?driver_number=55&session_key=9159&speed%3E=315`
+          : `https://api.openf1.org/v1/car_data?driver_number=1&session_key=latest&date>${since}`
+      );
+
+      const data = res.data;
+      if (data.length > 0) latestData = data[data.length - 1];
+    } catch (err) {
+      console.error('OpenF1 fetch error in index.js line 24:', err.message);
+    }
+  }, 500);
+} else {
+  console.log('⏸ Data fetch is paused. Set running = true to enable.');
+}
 
 app.get('/api/live-data', (req, res) => {
   if (latestData) {
-    const { throttle, brake, n_gear, date } = latestData;
-    res.json({ throttle, brake, n_gear, date });
+    const { throttle, brake, n_gear, speed, date } = latestData;
+    res.json({ throttle, brake, n_gear, speed, date });
   } else {
     res.status(204).send();
   }
