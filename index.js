@@ -32,6 +32,7 @@ if (running) {
   }, 500);
 } else {
   console.log('⏸ Data fetch is paused. Set running = true to enable.');
+  latestData = null;
 }
 
 app.get('/api/live-data', (req, res) => {
