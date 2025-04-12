@@ -50,8 +50,8 @@ if (running) {
         locData.sort((a, b) => new Date(a.date) - new Date(b.date));
         const oldest = locData[0];
         latestPosition = {
-          x: normalize(oldest.x, xMin, xMax),
-          y: 1 - normalize(oldest.y, yMin, yMax), // flip Y for SVG
+          x: normalize(oldest.x, xMin, xMax) * 0.5,
+          y: 1 - normalize(oldest.y, yMin, yMax) * 0.5, // flip Y for SVG
         };
       }
     } catch (err) {
