@@ -12,11 +12,13 @@ const testing = true;
 const running = false;
 
 let latestData = null;
+let latestPosition = null;
 
 if (running) {
+  // Fetch car data
   setInterval(async () => {
     try {
-      const since = new Date(Date.now() - 5000).toISOString(); // 5s window
+      const since = new Date(Date.now() - 5000).toISOString();
 
       const res = await axios.get(
         testing
@@ -27,23 +29,45 @@ if (running) {
       const data = res.data;
 
       if (data.length > 0) {
-        // Sort by date ascending and pick the oldest
         data.sort((a, b) => new Date(a.date) - new Date(b.date));
         latestData = data[0];
       }
     } catch (err) {
-      console.error('OpenF1 fetch error in index.js line 24:', err.message);
+      console.error('Car data fetch error:', err.message);
+    }
+  }, 500);
+
+  // Fetch position data
+  setInterval(async () => {
+    try {
+      const since = new Date(Date.now() - 5000).toISOString();
+
+      const res = await axios.get(
+        testing
+          ? `https://api.openf1.org/v1/position?driver_number=55&session_key=9159`
+          : `https://api.openf1.org/v1/position?driver_number=1&session_key=latest&date>${since}`
+      );
+
+      const data = res.data;
+
+      if (data.length > 0) {
+        data.sort((a, b) => new Date(b.date) - new Date(a.date)); // latest first
+        latestPosition = data[0].position;
+      }
+    } catch (err) {
+      console.error('Position fetch error:', err.message);
     }
   }, 500);
 } else {
   console.log('⏸ Data fetch is paused. Set running = true to enable.');
   latestData = null;
+  latestPosition = null;
 }
 
 app.get('/api/live-data', (req, res) => {
   if (latestData) {
     const { throttle, brake, n_gear, speed, date } = latestData;
-    res.json({ throttle, brake, n_gear, speed, date });
+    res.json({ throttle, brake, n_gear, speed, date, position: latestPosition });
   } else {
     res.status(204).send();
   }
