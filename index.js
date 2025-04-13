@@ -112,8 +112,21 @@ if (running) {
 app.get('/api/live-data', (req, res) => {
   if (latestData) {
     const { throttle, brake, n_gear, speed, date } = latestData;
-    const currentLapTime = currentLapStart ? (Date.now() - currentLapStart.getTime()) / 1000 : null;
-    const lapDelta = lastLap && previousLap ? (lastLap.lap_duration - previousLap.lap_duration) : null;
+
+    // Fallback simulated test data
+    if (testing && (!lastLap || !previousLap)) {
+      lastLap = { lap_duration: 91.743 };
+      previousLap = { lap_duration: 92.201 };
+      currentLapStart = new Date(Date.now() - 32000);
+    }
+
+    const currentLapTime = currentLapStart
+      ? (Date.now() - currentLapStart.getTime()) / 1000
+      : null;
+
+    const lapDelta = lastLap && previousLap
+      ? (lastLap.lap_duration - previousLap.lap_duration)
+      : null;
 
     res.json({
       throttle,
