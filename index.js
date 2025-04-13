@@ -36,7 +36,7 @@ if (running) {
     }
   }, 500);
 
-  // Fetch position data (every 500ms)
+  // Fetch position data
   setInterval(async () => {
     try {
       const since = new Date(Date.now() - 5000).toISOString();
@@ -54,7 +54,7 @@ if (running) {
     } catch (err) {
       console.error('Position fetch error:', err.message);
     }
-  }, 500);
+  }, 1000);
 
   // Fetch interval data
   setInterval(async () => {
