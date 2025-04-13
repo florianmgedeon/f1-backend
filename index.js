@@ -12,56 +12,32 @@ const testing = true;
 const running = false;
 
 let latestData = null;
-let latestPosition = null;
-
-// Normalization bounds for Bahrain (based on your SVG)
-const xMin = -577;
-const xMax = 7440;
-const yMin = -3500;
-const yMax = 8346;
-
-function normalize(value, min, max) {
-  return (value - min) / (max - min);
-}
 
 if (running) {
   setInterval(async () => {
     try {
-      const since = new Date(Date.now() - 5000).toISOString();
+      const since = new Date(Date.now() - 5000).toISOString(); // 5s window
 
-      const resCar = await axios.get(
+      const res = await axios.get(
         testing
           ? `https://api.openf1.org/v1/car_data?driver_number=55&session_key=9159&speed%3E=315`
           : `https://api.openf1.org/v1/car_data?driver_number=1&session_key=latest&date>${since}`
       );
-      const carData = resCar.data;
-      if (carData.length > 0) {
-        carData.sort((a, b) => new Date(a.date) - new Date(b.date));
-        latestData = carData[0];
-      }
 
-      const resLoc = await axios.get(
-        testing
-          ? `https://api.openf1.org/v1/location?driver_number=1&session_key=9472&date%3E2024-03-02T15:15:01.359000+00:00&date%3C2024-03-02T15:15:49.519000+00:00`
-          : `https://api.openf1.org/v1/location?driver_number=1&session_key=latest&date>${since}`
-      );
-      const locData = resLoc.data;
-      if (locData.length > 0) {
-        locData.sort((a, b) => new Date(a.date) - new Date(b.date));
-        const oldest = locData[0];
-        latestPosition = {
-          x: normalize(oldest.x, xMin, xMax) * 0.5,
-          y: 1 - normalize(oldest.y, yMin, yMax) * 0.5, // flip Y for SVG
-        };
+      const data = res.data;
+
+      if (data.length > 0) {
+        // Sort by date ascending and pick the oldest
+        data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        latestData = data[0];
       }
     } catch (err) {
-      console.error('OpenF1 fetch error:', err.message);
+      console.error('OpenF1 fetch error in index.js line 24:', err.message);
     }
   }, 500);
 } else {
-  console.log('Data fetch is paused. Set running = true to enable.');
+  console.log('⏸ Data fetch is paused. Set running = true to enable.');
   latestData = null;
-  latestPosition = null;
 }
 
 app.get('/api/live-data', (req, res) => {
@@ -73,16 +49,8 @@ app.get('/api/live-data', (req, res) => {
   }
 });
 
-app.get('/api/track-position', (req, res) => {
-  if (latestPosition) {
-    res.json(latestPosition);
-  } else {
-    res.status(204).send();
-  }
-});
-
 app.get('/', (req, res) => {
-  res.send('Backend is live. Try /api/live-data or /api/track-position');
+  res.send('Backend is live. Try /api/live-data');
 });
 
 app.listen(PORT, () => {
