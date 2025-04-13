@@ -56,7 +56,7 @@ if (running) {
     }
   }, 500);
 
-  // Fetch interval data (every 5000ms = 5s)
+  // Fetch interval data
   setInterval(async () => {
     try {
       const since = new Date(Date.now() - 5000).toISOString();
@@ -74,7 +74,7 @@ if (running) {
     } catch (err) {
       console.error('Interval fetch error:', err.message);
     }
-  }, 5000);
+  }, 10000);
 } else {
   console.log('⏸ Data fetch is paused. Set running = true to enable.');
   latestData = null;
