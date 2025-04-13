@@ -54,7 +54,7 @@ if (running) {
     } catch (err) {
       console.error('Position fetch error:', err.message);
     }
-  }, 1000);
+  }, 500);
 
   // Fetch interval data
   setInterval(async () => {
