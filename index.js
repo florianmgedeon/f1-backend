@@ -59,7 +59,7 @@ if (running) {
   // Fetch interval data
   setInterval(async () => {
     try {
-      const since = new Date(Date.now() - 5000).toISOString();
+      const since = new Date(Date.now() - 10000).toISOString();
       const res = await axios.get(
         testing
           ? `https://api.openf1.org/v1/intervals?session_key=9165&interval%3C0.005`
