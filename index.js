@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🏁 FLAGS
 const testing = true;
-const running = false;
+const running = true;
 
 let latestData = null;
 let latestPosition = null;
@@ -42,7 +42,7 @@ if (running) {
 
       const resLoc = await axios.get(
         testing
-          ? `https://api.openf1.org/v1/location?driver_number=55&session_key=9159&date>${since}`
+          ? `https://api.openf1.org/v1/location?driver_number=1&session_key=9472&date%3E2024-03-02T15:15:01.359000+00:00&date%3C2024-03-02T15:15:49.519000+00:00`
           : `https://api.openf1.org/v1/location?driver_number=1&session_key=latest&date>${since}`
       );
       const locData = resLoc.data;
