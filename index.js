@@ -15,8 +15,12 @@ let latestData = null;
 let latestPosition = null;
 let latestInterval = null;
 
+let lastLap = null;
+let previousLap = null;
+let currentLapStart = null;
+
 if (running) {
-  // Fetch car data (every 500ms)
+  // Car data (500ms)
   setInterval(async () => {
     try {
       const since = new Date(Date.now() - 5000).toISOString();
@@ -25,7 +29,6 @@ if (running) {
           ? `https://api.openf1.org/v1/car_data?driver_number=55&session_key=9159&speed%3E=315`
           : `https://api.openf1.org/v1/car_data?driver_number=1&session_key=latest&date>${since}`
       );
-
       const data = res.data;
       if (data.length > 0) {
         data.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -36,7 +39,7 @@ if (running) {
     }
   }, 500);
 
-  // Fetch position data
+  // Position (500ms)
   setInterval(async () => {
     try {
       const since = new Date(Date.now() - 5000).toISOString();
@@ -45,7 +48,6 @@ if (running) {
           ? `https://api.openf1.org/v1/position?driver_number=55&session_key=9159`
           : `https://api.openf1.org/v1/position?driver_number=1&session_key=latest&date>${since}`
       );
-
       const data = res.data;
       if (data.length > 0) {
         data.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -56,7 +58,7 @@ if (running) {
     }
   }, 500);
 
-  // Fetch interval data
+  // Interval (10s)
   setInterval(async () => {
     try {
       const since = new Date(Date.now() - 10000).toISOString();
@@ -65,7 +67,6 @@ if (running) {
           ? `https://api.openf1.org/v1/intervals?session_key=9165&interval%3C0.005`
           : `https://api.openf1.org/v1/intervals?driver_number=1&session_key=latest&date>${since}`
       );
-
       const data = res.data;
       if (data.length > 0) {
         data.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -75,6 +76,32 @@ if (running) {
       console.error('Interval fetch error:', err.message);
     }
   }, 10000);
+
+  // Lap data (1s)
+  setInterval(async () => {
+    try {
+      const since = new Date(Date.now() - 20000).toISOString();
+      const res = await axios.get(
+        testing
+          ? `https://api.openf1.org/v1/laps?session_key=9161&driver_number=63&lap_number%3E7&lap_number%3C10`
+          : `https://api.openf1.org/v1/laps?session_key=latest&driver_number=1&date_start>${since}`
+      );
+      const data = res.data;
+      if (data.length > 0) {
+        data.sort((a, b) => b.lap_number - a.lap_number);
+        const latest = data[0];
+
+        if (!lastLap || lastLap.lap_number !== latest.lap_number) {
+          // new lap finished
+          previousLap = lastLap;
+          lastLap = latest;
+          currentLapStart = new Date(latest.date_start);
+        }
+      }
+    } catch (err) {
+      console.error('Lap fetch error:', err.message);
+    }
+  }, 1000);
 } else {
   console.log('⏸ Data fetch is paused. Set running = true to enable.');
   latestData = null;
@@ -85,6 +112,9 @@ if (running) {
 app.get('/api/live-data', (req, res) => {
   if (latestData) {
     const { throttle, brake, n_gear, speed, date } = latestData;
+    const currentLapTime = currentLapStart ? (Date.now() - currentLapStart.getTime()) / 1000 : null;
+    const lapDelta = lastLap && previousLap ? (lastLap.lap_duration - previousLap.lap_duration) : null;
+
     res.json({
       throttle,
       brake,
@@ -92,7 +122,9 @@ app.get('/api/live-data', (req, res) => {
       speed,
       date,
       position: latestPosition,
-      interval: latestInterval
+      interval: latestInterval,
+      lap_time: currentLapTime,
+      lap_delta: lapDelta
     });
   } else {
     res.status(204).send();
