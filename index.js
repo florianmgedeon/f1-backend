@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🏁 FLAGS
 const testing = false;
-const running = true;
+const running = false;
 
 let latestData = null;
 let latestPosition = null;
