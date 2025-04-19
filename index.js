@@ -8,8 +8,8 @@ app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 // 🏁 FLAGS
-const testing = true;
-const running = false;
+const testing = false;
+const running = true;
 
 let latestData = null;
 let latestPosition = null;
