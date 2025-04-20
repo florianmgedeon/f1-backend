@@ -75,7 +75,7 @@ if (running) {
     } catch (err) {
       console.error('Interval fetch error:', err.message);
     }
-  }, 10000);
+  }, 1000);
 
   // Lap data (1s)
   setInterval(async () => {
