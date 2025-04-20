@@ -65,7 +65,7 @@ if (running) {
       const res = await axios.get(
         testing
           ? `https://api.openf1.org/v1/intervals?session_key=9165&interval%3C0.005`
-          : `https://api.openf1.org/v1/intervals?driver_number=1&session_key=latest&date>${since}`
+          : `https://api.openf1.org/v1/intervals?driver_number=1&session_key=latest`
       );
       const data = res.data;
       if (data.length > 0) {
@@ -84,7 +84,7 @@ if (running) {
       const res = await axios.get(
         testing
           ? `https://api.openf1.org/v1/laps?session_key=9161&driver_number=63&lap_number%3E7&lap_number%3C10`
-          : `https://api.openf1.org/v1/laps?session_key=latest&driver_number=1&date_start>${since}`
+          : `https://api.openf1.org/v1/laps?session_key=latest&driver_number=1`
       );
       const data = res.data;
       if (data.length > 0) {
