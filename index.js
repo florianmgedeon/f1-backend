@@ -46,7 +46,7 @@ if (running) {
       const res = await axios.get(
         testing
           ? `https://api.openf1.org/v1/position?driver_number=55&session_key=9159`
-          : `https://api.openf1.org/v1/position?driver_number=1&session_key=latest&date>${since}`
+          : `https://api.openf1.org/v1/position?driver_number=1&session_key=latest`
       );
       const data = res.data;
       if (data.length > 0) {
