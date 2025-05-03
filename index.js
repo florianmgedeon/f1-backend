@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🏁 FLAGS
 const testing = true;
-const running = false;
+const running = true;
 
 let latestData = null;
 let latestPosition = null;
@@ -18,6 +18,8 @@ let latestInterval = null;
 let lastLap = null;
 let previousLap = null;
 let currentLapStart = null;
+
+let latestLocation = [];
 
 if (running) {
   // Car data (500ms)
@@ -92,7 +94,6 @@ if (running) {
         const latest = data[0];
 
         if (!lastLap || lastLap.lap_number !== latest.lap_number) {
-          // new lap finished
           previousLap = lastLap;
           lastLap = latest;
           currentLapStart = new Date(latest.date_start);
@@ -100,6 +101,26 @@ if (running) {
       }
     } catch (err) {
       console.error('Lap fetch error:', err.message);
+    }
+  }, 1000);
+
+  // Location data (1s)
+  setInterval(async () => {
+    try {
+      const since = new Date(Date.now() - 5000).toISOString();
+      const until = new Date().toISOString();
+      const res = await axios.get(
+        testing
+          ? `https://api.openf1.org/v1/location?session_key=9161&driver_number=81&date>${since}&date<${until}`
+          : `https://api.openf1.org/v1/location?session_key=latest&driver_number=1&date>${since}&date<${until}`
+      );
+      const data = res.data;
+      if (data.length > 0) {
+        data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        latestLocation.push(data[0]);
+      }
+    } catch (err) {
+      console.error('Location fetch error:', err.message);
     }
   }, 1000);
 } else {
@@ -113,14 +134,12 @@ app.get('/api/live-data', (req, res) => {
   if (latestData) {
     const { throttle, brake, n_gear, speed, date } = latestData;
 
-    // Fallback simulated test data
     if (testing && (!lastLap || !previousLap)) {
       lastLap = { lap_duration: 91.743 };
       previousLap = { lap_duration: 92.201 };
       currentLapStart = new Date(Date.now() - 32000);
     }
 
-    // Show only the duration of the last completed lap
     const lastLapTime = lastLap ? lastLap.lap_duration : null;
 
     const lapDelta = lastLap && previousLap
@@ -141,6 +160,10 @@ app.get('/api/live-data', (req, res) => {
   } else {
     res.status(204).send();
   }
+});
+
+app.get('/api/location', (req, res) => {
+  res.json(latestLocation);
 });
 
 app.get('/', (req, res) => {
