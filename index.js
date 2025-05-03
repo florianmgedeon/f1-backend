@@ -120,9 +120,8 @@ app.get('/api/live-data', (req, res) => {
       currentLapStart = new Date(Date.now() - 32000);
     }
 
-    const currentLapTime = currentLapStart
-      ? (Date.now() - currentLapStart.getTime()) / 1000
-      : null;
+    // Show only the duration of the last completed lap
+    const lastLapTime = lastLap ? lastLap.lap_duration : null;
 
     const lapDelta = lastLap && previousLap
       ? (lastLap.lap_duration - previousLap.lap_duration)
@@ -136,7 +135,7 @@ app.get('/api/live-data', (req, res) => {
       date,
       position: latestPosition,
       interval: latestInterval,
-      lap_time: currentLapTime,
+      lap_time: lastLapTime,
       lap_delta: lapDelta
     });
   } else {
