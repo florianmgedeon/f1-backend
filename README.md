@@ -20,9 +20,7 @@ This is a live telemetry dashboard for Max Verstappen using real-time data from 
 
 ## 🛠️ Backend Repository
 
-The backend handles data retrieval and processing from OpenF1's API.
-
-🔧 [GitHub – f1-backend](https://github.com/florianmgedeon/f1-backend)
+This backend repo handles data retrieval and processing from OpenF1's API.
 
 ---
 
